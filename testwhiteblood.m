@@ -91,3 +91,14 @@ set(himager, 'AlphaData', 0.5);
 
 %% Output total red blood cells onto the figure
 title(sprintf('%i Red Blood Cells Detected',redcount),'fontsize',14);
+
+%% Calculate percentages
+totalCells = whitecount + redcount;
+wbcPercent = (whitecount ./ totalCells) .* 100;
+rbcPercent = (redcount ./ totalCells) .* 100;
+
+figure
+title('Results','fontsize',14);
+text(0,.7,sprintf('Total Blood Cells: %i',totalCells),'FontSize',14)
+text(0,.5,sprintf('White Blood Cells: %i %%',vpa(wbcPercent)),'FontSize',14)
+text(0,.3,sprintf('Red Blood Cells: %i %%',vpa(rbcPercent)),'FontSize',14)
