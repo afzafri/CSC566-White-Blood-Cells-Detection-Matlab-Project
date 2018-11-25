@@ -4,15 +4,15 @@
 %% https://www.mathworks.com/matlabcentral/answers/3283-extracting-white-blood-cell-from-cell-samples#answer_4939
 
 %%Reading in the image
-myImage = imread('./bloodsmears/test6.jpg');
+myImage = imread('./bloodsmears/test2.jpg');
 figure
 imshow(myImage)
-title("Original Image");
+title("Original Image", 'fontsize',14);
 %%Extracting the blue plane 
 bPlane = myImage(:,:,3)  - 0.5*(myImage(:,:,1)) - 0.5*(myImage(:,:,2));
-figure
-imshow(bPlane)
-title('Extracted White Blood Cells','fontsize',14);
+%figure
+%imshow(bPlane)
+%title('Extracted White Blood Cells','fontsize',14);
 %%Extract out purple cells
 %figure
 BW = bPlane > 29;
@@ -53,9 +53,9 @@ title(sprintf('%i White Blood Cells Detected',whitecount),'fontsize',14);
 %% RED BLOOD CELLS
 %% Extracting the red plane 
 rPlane = myImage(:,:,1)- 0.4*(myImage(:,:,3)) - 0.6*(myImage(:,:,2));
-figure
-imshow(rPlane)
-title('Extracted Red Blood Cells','fontsize',14);
+%figure
+%imshow(rPlane)
+%title('Extracted Red Blood Cells','fontsize',14);
 %% Extract out red cells
 BWr = rPlane > 19;
 %figure
