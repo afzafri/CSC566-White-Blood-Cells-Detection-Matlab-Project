@@ -4,7 +4,7 @@
 %% https://www.mathworks.com/matlabcentral/answers/3283-extracting-white-blood-cell-from-cell-samples#answer_4939
 
 %%Reading in the image
-myImage = imread('./bloodsmears/test2.jpg');
+myImage = imread('./bloodsmears/test6.jpg');
 figure
 imshow(myImage)
 title("Original Image", 'fontsize',14);
