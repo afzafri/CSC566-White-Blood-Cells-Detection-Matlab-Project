@@ -22,7 +22,7 @@ function varargout = LeukemiaDetection(varargin)
 
 % Edit the above text to modify the response to help LeukemiaDetection
 
-% Last Modified by GUIDE v2.5 25-Nov-2018 20:15:16
+% Last Modified by GUIDE v2.5 25-Nov-2018 21:07:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -123,7 +123,7 @@ else
     propied=regionprops(L,'BoundingBox'); 
     himage = imshow(BW2);
 
-    %% Get the total number of cells that have been added with bounding box
+    %% Get the totalcells number of cells that have been added with bounding box
     whitecount = size(propied,1);
 
     %% Added bounding box to the white blood cells
@@ -136,7 +136,7 @@ else
     %% Superimpose the two image
     set(himage, 'AlphaData', 0.5);
     
-    %% set total white blood cells detected
+    %% set totalcells white blood cells detected
     set(handles.wbcText, 'string', sprintf('%i White Blood Cells Detected',whitecount));
     pause(2);
     
@@ -155,7 +155,7 @@ else
     
     %% Extract out red cells
     BWr = rPlane > 19;
-    imshow(BW);
+    imshow(BWr);
     set(handles.rbcText, 'string', 'Enhanced Image');
     pause(1);
     
@@ -178,7 +178,7 @@ else
     propiedr=regionprops(Lr,'BoundingBox'); 
     himager = imshow(BWr2);
 
-    %% Get the total number of cells that have been added with bounding box
+    %% Get the totalcells number of cells that have been added with bounding box
     redcount = size(propiedr,1);
 
     %% Added bounding box to the red blood cells
@@ -191,26 +191,36 @@ else
     %% Superimpose the two image
     set(himager, 'AlphaData', 0.5);
 
-    %% set total white blood cells detected
+    %% set totalcells white blood cells detected
     set(handles.rbcText, 'string', sprintf('%i Red Blood Cells Detected',redcount));
-    pause(2);
+    pause(1);
     
-
+    %% Calculate percentages
+    totalCells = whitecount + redcount;
+    wbcPercent = (whitecount ./ totalCells) .* 100;
+    rbcPercent = (redcount ./ totalCells) .* 100;
+    
+    set(handles.totalcells, 'string', totalCells);
+    set(handles.wbcpercent, 'string', sprintf('%i%%',vpa(wbcPercent)));
+    set(handles.rbcpercent, 'string', sprintf('%i%%',vpa(rbcPercent)));
+    
+    %% Show alert result
+    success = msgbox('Process done.','Success');
 end
 
 
-function total_Callback(hObject, eventdata, handles)
-% hObject    handle to total (see GCBO)
+function totalcells_Callback(hObject, eventdata, handles)
+% hObject    handle to totalcells (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of total as text
-%        str2double(get(hObject,'String')) returns contents of total as a double
+% Hints: get(hObject,'String') returns contents of totalcells as text
+%        str2double(get(hObject,'String')) returns contents of totalcells as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function total_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to total (see GCBO)
+function totalcells_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to totalcells (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
