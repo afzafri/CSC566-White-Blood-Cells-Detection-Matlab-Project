@@ -15,7 +15,7 @@ imshow(bPlane)
 title('Extracted White Blood Cells','fontsize',14);
 %%Extract out purple cells
 %figure
-BW = bPlane > 19;
+BW = bPlane > 29;
 %imshow(BW)
 %%Remove noise 100 pixels or less
 BW2 = bwareaopen(BW, 100);
@@ -48,3 +48,28 @@ set(himage, 'AlphaData', 0.5);
 
 %% Output total white blood cells onto the figure
 title(sprintf('%i White Blood Cells Detected',whitecount),'fontsize',14);
+
+
+%% RED BLOOD CELLS
+
+
+%% Label connected components
+[Lr Ner]=bwlabel(BWr2);
+propiedr=regionprops(Lr,'BoundingBox'); 
+himager = imshow(BWr2);
+
+%% Get the total number of cells that have been added with bounding box
+redcount = size(propiedr,1);
+
+%% Added bounding box to the red blood cells
+hold on
+for n=1:redcount
+  rectangle('Position',propiedr(n).BoundingBox,'EdgeColor','r','LineWidth',2)
+end
+hold off
+
+%% Superimpose the two image
+set(himager, 'AlphaData', 0.5);
+
+%% Output total red blood cells onto the figure
+title(sprintf('%i Red Blood Cells Detected',redcount),'fontsize',14);
