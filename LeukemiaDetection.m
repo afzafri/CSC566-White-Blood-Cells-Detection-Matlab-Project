@@ -86,17 +86,22 @@ else
    %%Reading in the image
     myImage = imread(selectedfile);
    
-   %% White Blood Cells
+   %% WHITE BLOOD CELLS
+    axes(handles.axes1);
+    imshow(myImage);
+    set(handles.wbcText, 'string', 'Loaded Blood Smears Image');
+    pause(1);
+    
     %%Extracting the blue plane 
     bPlane = myImage(:,:,3)  - 0.5*(myImage(:,:,1)) - 0.5*(myImage(:,:,2));
-    axes(handles.axes1);
     imshow(bPlane);
     set(handles.wbcText, 'string', 'Extracted White Blood Cells');
     pause(1);
     
     %%Extract out purple cells
     BW = bPlane > 29;
-    imshow(BW, 'Parent', handles.axes1);
+    imshow(BW);
+    set(handles.wbcText, 'string', 'Enhanced Image');
     pause(1);
     
     %%Remove noise 100 pixels or less
@@ -133,6 +138,62 @@ else
     
     %% set total white blood cells detected
     set(handles.wbcText, 'string', sprintf('%i White Blood Cells Detected',whitecount));
+    pause(2);
+    
+    
+    %% RED BLOOD CELLS
+    axes(handles.axes2);
+    imshow(myImage);
+    set(handles.rbcText, 'string', 'Loaded Blood Smears Image');
+    pause(1);
+    
+    %% Extracting the red plane 
+    rPlane = myImage(:,:,1)- 0.4*(myImage(:,:,3)) - 0.6*(myImage(:,:,2));
+    imshow(rPlane);
+    set(handles.rbcText, 'string', 'Extracted Red Blood Cells');
+    pause(1);
+    
+    %% Extract out red cells
+    BWr = rPlane > 19;
+    imshow(BW);
+    set(handles.rbcText, 'string', 'Enhanced Image');
+    pause(1);
+    
+    %%Remove noise 100 pixels or less
+    BWr2 = bwareaopen(BWr, 100);
+    imshow(BWr2);
+    set(handles.rbcText, 'string', 'Noise Removed');
+    pause(1);
+    
+    %%Calculate area of regions
+    cellStatsr = regionprops(BWr2, 'all');
+    cellAreasr = [cellStatsr(:).Area];
+
+    %% create new figure to output superimposed images
+    % first display the original image
+    imshow(myImage), hold on
+
+    %% Label connected components
+    [Lr Ner]=bwlabel(BWr2);
+    propiedr=regionprops(Lr,'BoundingBox'); 
+    himager = imshow(BWr2);
+
+    %% Get the total number of cells that have been added with bounding box
+    redcount = size(propiedr,1);
+
+    %% Added bounding box to the red blood cells
+    hold on
+    for n=1:redcount
+      rectangle('Position',propiedr(n).BoundingBox,'EdgeColor','r','LineWidth',2)
+    end
+    hold off
+
+    %% Superimpose the two image
+    set(himager, 'AlphaData', 0.5);
+
+    %% set total white blood cells detected
+    set(handles.rbcText, 'string', sprintf('%i Red Blood Cells Detected',redcount));
+    pause(2);
     
 
 end
