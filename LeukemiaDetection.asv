@@ -89,8 +89,7 @@ else
    %% White Blood Cells
     %%Extracting the blue plane 
     bPlane = myImage(:,:,3)  - 0.5*(myImage(:,:,1)) - 0.5*(myImage(:,:,2));
-    axes(handles.axes1);
-    imshow(bPlane);
+    imshow(bPlane, 'Parent', handles.axes1);
     set(handles.wbcText, 'string', 'Extracted White Blood Cells');
     pause(1);
     
@@ -101,8 +100,9 @@ else
     
     %%Remove noise 100 pixels or less
     BW2 = bwareaopen(BW, 100);
-    imshow(BW2);
-    set(handles.wbcText, 'string', 'Noise Removed');
+    imshow(BW2, 'Parent', handles.axes1);
+    set(handles.wbcText, 'string', 'Extracted White Blood Cells');
+    title('Noise Removed','fontsize',14);
     pause(1);
     
     %%Calculate area of regions
@@ -111,12 +111,12 @@ else
 
     %% create new figure to output superimposed images
     % first display the original image
-    imshow(myImage), hold on
+    imshow(myImage, 'Parent', handles.axes1), hold on
 
     %% Label connected components
     [L Ne]=bwlabel(BW2);
     propied=regionprops(L,'BoundingBox'); 
-    himage = imshow(BW2);
+    himage = imshow(BW2, 'Parent', handles.axes1);
 
     %% Get the total number of cells that have been added with bounding box
     whitecount = size(propied,1);
@@ -130,10 +130,6 @@ else
 
     %% Superimpose the two image
     set(himage, 'AlphaData', 0.5);
-    
-    %% set total white blood cells detected
-    set(handles.wbcText, 'string', sprintf('%i White Blood Cells Detected',whitecount));
-    
 
 end
 
