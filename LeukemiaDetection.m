@@ -22,7 +22,7 @@ function varargout = LeukemiaDetection(varargin)
 
 % Edit the above text to modify the response to help LeukemiaDetection
 
-% Last Modified by GUIDE v2.5 26-Nov-2018 20:17:01
+% Last Modified by GUIDE v2.5 26-Nov-2018 20:30:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -83,7 +83,11 @@ if isequal(file,0)
    disp('User selected Cancel');
 else
    selectedfile = fullfile(path,file);
-   cellsSegmentation(handles, selectedfile);
+   %%Reading in the image
+    myImage = imread(selectedfile);
+   
+   % call process function
+   cellsSegmentation(handles, myImage);
 end
 
 % --- Executes on button press in loadCamera.
@@ -95,6 +99,7 @@ function loadCamera_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of loadCamera
 a = imaqhwinfo;
 [camera_name, camera_id, format] = getCameraInfo(a);
+global vid;
 vid = videoinput(camera_name, camera_id, format);
 
 % Set the properties of the video object
@@ -105,8 +110,10 @@ vid.FrameGrabInterval = 5;
 %start the video aquisition here
 start(vid)
 
+set(handles.captureImg,'Visible','on');
+
 % Set a loop that stop after 100 frames of aquisition
-while(vid.FramesAcquired<=100)
+while(vid.FramesAcquired<=200)
     inputimage = getsnapshot(vid);
     axes(handles.axes1);
     imshow(inputimage);
@@ -118,10 +125,30 @@ stop(vid);
 % Flush all the image data stored in the memory buffer.
 flushdata(vid);
 
+% --- Executes on button press in captureImg.
+function captureImg_Callback(hObject, eventdata, handles)
+% hObject    handle to captureImg (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
-function cellsSegmentation(handles, selectedfile)
-%%Reading in the image
-myImage = imread(selectedfile);
+% Hint: get(hObject,'Value') returns toggle state of captureImg
+global vid;
+
+% capture image
+inputimage = getframe(handles.axes1);
+
+% Stop the video aquisition.
+stop(vid);
+% Flush all the image data stored in the memory buffer.
+flushdata(vid);
+cla;
+
+set(handles.captureImg,'Visible','off');
+
+% call process function
+cellsSegmentation(handles, inputimage.cdata);
+
+function cellsSegmentation(handles, myImage)
 
 %% WHITE BLOOD CELLS
 axes(handles.axes1);
