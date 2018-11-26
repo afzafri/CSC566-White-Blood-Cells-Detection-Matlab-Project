@@ -293,6 +293,12 @@ set(handles.totalcells, 'string', totalCells);
 set(handles.wbcpercent, 'string', sprintf('%i%%',vpa(wbcPercent)));
 set(handles.rbcpercent, 'string', sprintf('%i%%',vpa(rbcPercent)));
 
+if vpa(wbcPercent) >= 20
+    set(handles.resultText, 'string', 'POTENTIAL LEUKEMIA DETECTED');
+else
+    set(handles.resultText, 'string', 'Normal');
+end
+
 %% Show alert result
 success = msgbox('Process done.','Success');
 

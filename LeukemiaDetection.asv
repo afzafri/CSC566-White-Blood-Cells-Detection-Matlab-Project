@@ -113,10 +113,34 @@ start(vid)
 set(handles.captureImg,'Visible','on');
 
 % Set a loop that stop after 100 frames of aquisition
+axes(handles.axes1);
 while(vid.FramesAcquired<=200)
-    inputimage = getsnapshot(vid);
+    myImage = getsnapshot(vid);
     
-    imshow(inputimage);
+    %%Extracting the blue plane 
+    bPlane = myImage(:,:,3)  - 0.5*(myImage(:,:,1)) - 0.5*(myImage(:,:,2));
+    %%Extract out purple cells
+    BW = bPlane > 29;
+    %%Remove noise 100 pixels or less
+    BW2 = bwareaopen(BW, 100);
+    
+    % first display the original image
+    imshow(myImage), hold on
+
+    %% Label connected components
+    [L Ne]=bwlabel(BW2);
+    propied=regionprops(L,'BoundingBox'); 
+    imshow(myImage);
+
+    %% Get the totalcells number of cells that have been added with bounding box
+    whitecount = size(propied,1);
+
+    %% Added bounding box to the white blood cells
+    hold on
+    for n=1:whitecount
+      rectangle('Position',propied(n).BoundingBox,'EdgeColor','g','LineWidth',2)
+    end
+    hold off
 end
 
 % Stop the video aquisition.
@@ -135,7 +159,8 @@ function captureImg_Callback(hObject, eventdata, handles)
 global vid;
 
 % capture image
-inputimage = getframe(handles.axes1);
+%inputimage = getframe(handles.axes1);
+inputimage = getsnapshot(vid);
 
 % Stop the video aquisition.
 stop(vid);
@@ -146,7 +171,7 @@ cla;
 set(handles.captureImg,'Visible','off');
 
 % call process function
-cellsSegmentation(handles, inputimage.cdata);
+cellsSegmentation(handles, inputimage);
 
 function cellsSegmentation(handles, myImage)
 
@@ -267,6 +292,12 @@ rbcPercent = (redcount ./ totalCells) .* 100;
 set(handles.totalcells, 'string', totalCells);
 set(handles.wbcpercent, 'string', sprintf('%i%%',vpa(wbcPercent)));
 set(handles.rbcpercent, 'string', sprintf('%i%%',vpa(rbcPercent)));
+
+if vpa(wbcPercent) >= 20
+    set(handles.resultText, 'string', 'POTENTIAL LEUKEMIA DETECTED');
+else
+    set(handles.resultText, 'string', 'Normal');
+end
 
 %% Show alert result
 success = msgbox('Process done.','Success');
