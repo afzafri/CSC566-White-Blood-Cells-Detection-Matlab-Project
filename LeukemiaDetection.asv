@@ -93,8 +93,6 @@ function loadCamera_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of loadCamera
-a = imaqhwinfo;
-[camera_name, camera_id, format] = getCameraInfo(a);
 vid = videoinput(camera_name, camera_id, format);
 
 % Set the properties of the video object
@@ -106,10 +104,9 @@ vid.FrameGrabInterval = 5;
 start(vid)
 
 % Set a loop that stop after 100 frames of aquisition
-while(vid.FramesAcquired<=100)
-    inputimage = getsnapshot(vid);
-    axes(handles.axes1);
-    imshow(inputimage);
+while(vid.FramesAcquired<=200)
+    Inputimage = getsnapshot(vid);
+    
 end
 
 % Stop the video aquisition.
