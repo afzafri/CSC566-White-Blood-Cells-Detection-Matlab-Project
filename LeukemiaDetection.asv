@@ -22,7 +22,7 @@ function varargout = LeukemiaDetection(varargin)
 
 % Edit the above text to modify the response to help LeukemiaDetection
 
-% Last Modified by GUIDE v2.5 06-Dec-2018 23:22:33
+% Last Modified by GUIDE v2.5 07-Dec-2018 00:13:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -88,7 +88,7 @@ else
    
    % call process function
    cellsSegmentation(handles, myImage, "rgb");
-   cellsSegmentation(handles, myImage, "hsv");
+   cellsSegmentation(handles, myImage, "cmyk");
    cellsSegmentation(handles, myImage, "xyz");
    
    %% Show alert result
@@ -176,9 +176,9 @@ cla;
 set(handles.captureImg,'Visible','off');
 
 % call process function
-cellsSegmentation(handles, myImage, "rgb");
-cellsSegmentation(handles, myImage, "hsv");
-cellsSegmentation(handles, myImage, "xyz");
+cellsSegmentation(handles, inputimage, "rgb");
+cellsSegmentation(handles, inputimage, "cmyk");
+cellsSegmentation(handles, inputimage, "yuv");
 
 %% Show alert result
 success = msgbox('Process done.','Success');
@@ -189,12 +189,18 @@ function cellsSegmentation(handles, myImage, colorspace)
 myImage = convertColorSpace(colorspace, myImage);
 
 %% WHITE BLOOD CELLS
-if colorspace == "hsv"
-        axes(handles.hsv1);
-elseif colorspace == "xyz"
+if colorspace == "cmyk"
+        axes(handles.cmyk1);
+        WBC = handles.wbcCMYK;
+        RBC = handles.rbcCMYK;
+elseif colorspace == "yuv"
         axes(handles.xyz1);
+        WBC = handles.wbcXYZ;
+        RBC = handles.rbcXYZ;
 else
         axes(handles.rgb1);
+        WBC = handles.wbcRGB;
+        RBC = handles.rbcRGB;
 end
 imshow(myImage);
 set(handles.wbcText, 'string', 'Loaded Blood Smears Image');
@@ -245,14 +251,15 @@ hold off
 set(himage, 'AlphaData', 0.5);
 
 %% set totalcellsRGB white blood cells detected
-set(handles.wbcText, 'string', sprintf('%i White Blood Cells Detected',whitecount));
+set(handles.wbcText, 'string', 'Process Done');
+set(WBC, 'string', whitecount);
 pause(2);
 
 
 %% RED BLOOD CELLS
-if colorspace == "hsv"
-        axes(handles.hsv2);
-elseif colorspace == "xyz"
+if colorspace == "cmyk"
+        axes(handles.cmyk2);
+elseif colorspace == "yuv"
         axes(handles.xyz2);
 else
         axes(handles.rgb2);
@@ -306,7 +313,8 @@ hold off
 set(himager, 'AlphaData', 0.5);
 
 %% set totalcellsRGB white blood cells detected
-set(handles.rbcText, 'string', sprintf('%i Red Blood Cells Detected',redcount));
+set(handles.rbcText, 'string', 'Process Done');
+set(RBC, 'string', redcount);
 pause(1);
 
 %% Calculate percentages
@@ -314,36 +322,21 @@ totalCells = whitecount + redcount;
 wbcPercent = (whitecount ./ totalCells) .* 100;
 rbcPercent = (redcount ./ totalCells) .* 100;
 
-if colorspace == "hsv"
-        set(handles.totalcellsHSV, 'string', totalCells);
-        set(handles.wbcpercentHSV, 'string', sprintf('%i%%',vpa(wbcPercent)));
-        set(handles.rbcpercentHSV, 'string', sprintf('%i%%',vpa(rbcPercent)));
-        
-        if vpa(wbcPercent) >= 20
-            set(handles.resultTextHSV, 'string', 'POTENTIAL LEUKEMIA DETECTED');
-        else
-            set(handles.resultTextHSV, 'string', 'Normal');
-        end
-elseif colorspace == "xyz"
-        set(handles.totalcellsXYZ, 'string', totalCells);
-        set(handles.wbcpercentXYZ, 'string', sprintf('%i%%',vpa(wbcPercent)));
-        set(handles.rbcpercentXYZ, 'string', sprintf('%i%%',vpa(rbcPercent)));
-        
-        if vpa(wbcPercent) >= 20
-            set(handles.resultTextXYZ, 'string', 'POTENTIAL LEUKEMIA DETECTED');
-        else
-            set(handles.resultTextXYZ, 'string', 'Normal');
-        end
+if colorspace == "cmyk" 
+    totalCellsHandle = handles.totalcellsCMYK;
+    WBCPercentHandle = handles.wbcpercentCMYK;
+    RBCPercentHandle = handles.rbcpercentCMYK;
+    resultTextHandle = handles.resultTextCMYK;
+elseif colorspace == "yuv"
+    totalCellsHandle = handles.totalcellsXYZ;
+    WBCPercentHandle = handles.wbcpercentXYZ;
+    RBCPercentHandle = handles.rbcpercentXYZ;
+    resultTextHandle = handles.resultTextXYZ;    
 else
-        set(handles.totalcellsRGB, 'string', totalCells);
-        set(handles.wbcpercentRGB, 'string', sprintf('%i%%',vpa(wbcPercent)));
-        set(handles.rbcpercentRGB, 'string', sprintf('%i%%',vpa(rbcPercent)));
-        
-        if vpa(wbcPercent) >= 20
-            set(handles.resultTextRGB, 'string', 'POTENTIAL LEUKEMIA DETECTED');
-        else
-            set(handles.resultTextRGB, 'string', 'Normal');
-        end
+    totalCellsHandle = handles.totalcellsRGB;
+    WBCPercentHandle = handles.wbcpercentRGB;
+    RBCPercentHandle = handles.rbcpercentRGB;
+    resultTextHandle = handles.resultTextRGB;
 end
 
 set(totalCellsHandle, 'string', totalCells);
@@ -359,12 +352,12 @@ end
 
 function myImage = convertColorSpace(color, myImage)
 % convert RGB to other color space
-if color == "hsv"
-        myImage = rgb2hsv(myImage);
-elseif color == "lab"
-        myImage = rgb2lab(myImage);
-elseif color == "xyz"
-        myImage = rgb2xyz(myImage);
+if color == "cmyk"
+        cform = makecform('srgb2cmyk');
+        myImage = applycform(myImage,cform); 
+        myImage = myImage(:,:,1:3);
+elseif color == "yuv"
+        myImage = rgb2ycbcr(myImage);
 else
         myImage = myImage;
 end
@@ -438,18 +431,18 @@ end
 
 
 
-function totalcellsHSV_Callback(hObject, eventdata, handles)
-% hObject    handle to totalcellsHSV (see GCBO)
+function totalcellsCMYK_Callback(hObject, eventdata, handles)
+% hObject    handle to totalcellsCMYK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of totalcellsHSV as text
-%        str2double(get(hObject,'String')) returns contents of totalcellsHSV as a double
+% Hints: get(hObject,'String') returns contents of totalcellsCMYK as text
+%        str2double(get(hObject,'String')) returns contents of totalcellsCMYK as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function totalcellsHSV_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to totalcellsHSV (see GCBO)
+function totalcellsCMYK_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to totalcellsCMYK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -461,18 +454,18 @@ end
 
 
 
-function wbcpercentHSV_Callback(hObject, eventdata, handles)
-% hObject    handle to wbcpercentHSV (see GCBO)
+function wbcpercentCMYK_Callback(hObject, eventdata, handles)
+% hObject    handle to wbcpercentCMYK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of wbcpercentHSV as text
-%        str2double(get(hObject,'String')) returns contents of wbcpercentHSV as a double
+% Hints: get(hObject,'String') returns contents of wbcpercentCMYK as text
+%        str2double(get(hObject,'String')) returns contents of wbcpercentCMYK as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function wbcpercentHSV_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to wbcpercentHSV (see GCBO)
+function wbcpercentCMYK_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wbcpercentCMYK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -484,18 +477,18 @@ end
 
 
 
-function rbcpercentHSV_Callback(hObject, eventdata, handles)
-% hObject    handle to rbcpercentHSV (see GCBO)
+function rbcpercentCMYK_Callback(hObject, eventdata, handles)
+% hObject    handle to rbcpercentCMYK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of rbcpercentHSV as text
-%        str2double(get(hObject,'String')) returns contents of rbcpercentHSV as a double
+% Hints: get(hObject,'String') returns contents of rbcpercentCMYK as text
+%        str2double(get(hObject,'String')) returns contents of rbcpercentCMYK as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function rbcpercentHSV_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to rbcpercentHSV (see GCBO)
+function rbcpercentCMYK_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rbcpercentCMYK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -565,6 +558,144 @@ function rbcpercentXYZ_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function rbcpercentXYZ_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to rbcpercentXYZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function wbcRGB_Callback(hObject, eventdata, handles)
+% hObject    handle to wbcRGB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of wbcRGB as text
+%        str2double(get(hObject,'String')) returns contents of wbcRGB as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function wbcRGB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wbcRGB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function rbcRGB_Callback(hObject, eventdata, handles)
+% hObject    handle to rbcRGB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of rbcRGB as text
+%        str2double(get(hObject,'String')) returns contents of rbcRGB as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function rbcRGB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rbcRGB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function wbcCMYK_Callback(hObject, eventdata, handles)
+% hObject    handle to wbcCMYK (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of wbcCMYK as text
+%        str2double(get(hObject,'String')) returns contents of wbcCMYK as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function wbcCMYK_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wbcCMYK (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function rbcCMYK_Callback(hObject, eventdata, handles)
+% hObject    handle to rbcCMYK (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of rbcCMYK as text
+%        str2double(get(hObject,'String')) returns contents of rbcCMYK as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function rbcCMYK_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rbcCMYK (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function wbcXYZ_Callback(hObject, eventdata, handles)
+% hObject    handle to wbcXYZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of wbcXYZ as text
+%        str2double(get(hObject,'String')) returns contents of wbcXYZ as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function wbcXYZ_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wbcXYZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function rbcXYZ_Callback(hObject, eventdata, handles)
+% hObject    handle to rbcXYZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of rbcXYZ as text
+%        str2double(get(hObject,'String')) returns contents of rbcXYZ as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function rbcXYZ_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rbcXYZ (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
