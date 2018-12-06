@@ -175,6 +175,9 @@ cellsSegmentation(handles, inputimage);
 
 function cellsSegmentation(handles, myImage)
 
+% load image and convert color space
+myImage = convertColorSpace("xyz", myImage);
+
 %% WHITE BLOOD CELLS
 axes(handles.axes1);
 imshow(myImage);
@@ -301,6 +304,16 @@ end
 
 %% Show alert result
 success = msgbox('Process done.','Success');
+
+function myImage = convertColorSpace(color, myImage)
+% convert RGB to other color space
+if color == "hsv"
+        myImage = rgb2hsv(myImage);
+elseif color == "lab"
+        myImage = rgb2lab(myImage);
+elseif color == "xyz"
+        myImage = rgb2xyz(myImage);
+end
 
 function totalcells_Callback(hObject, eventdata, handles)
 % hObject    handle to totalcells (see GCBO)
