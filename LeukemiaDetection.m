@@ -22,7 +22,7 @@ function varargout = LeukemiaDetection(varargin)
 
 % Edit the above text to modify the response to help LeukemiaDetection
 
-% Last Modified by GUIDE v2.5 26-Nov-2018 20:30:14
+% Last Modified by GUIDE v2.5 06-Dec-2018 22:56:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -87,7 +87,7 @@ else
     myImage = imread(selectedfile);
    
    % call process function
-   cellsSegmentation(handles, myImage);
+   cellsSegmentation(handles, myImage, "hsv");
 end
 
 % --- Executes on button press in loadCamera.
@@ -113,7 +113,7 @@ start(vid)
 set(handles.captureImg,'Visible','on');
 
 % Set a loop that stop after 100 frames of aquisition
-axes(handles.axes1);
+axes(handles.rgb1);
 while(vid.FramesAcquired<=200)
     myImage = getsnapshot(vid);
     
@@ -159,7 +159,7 @@ function captureImg_Callback(hObject, eventdata, handles)
 global vid;
 
 % capture image
-%inputimage = getframe(handles.axes1);
+%inputimage = getframe(handles.rgb1);
 inputimage = getsnapshot(vid);
 
 % Stop the video aquisition.
@@ -171,15 +171,15 @@ cla;
 set(handles.captureImg,'Visible','off');
 
 % call process function
-cellsSegmentation(handles, inputimage);
+cellsSegmentation(handles, inputimage, "hsv");
 
-function cellsSegmentation(handles, myImage)
+function cellsSegmentation(handles, myImage, colorspace)
 
 % load image and convert color space
-myImage = convertColorSpace("xyz", myImage);
+myImage = convertColorSpace(colorspace, myImage);
 
 %% WHITE BLOOD CELLS
-axes(handles.axes1);
+axes(handles.rgb1);
 imshow(myImage);
 set(handles.wbcText, 'string', 'Loaded Blood Smears Image');
 pause(1);
@@ -234,7 +234,7 @@ pause(2);
 
 
 %% RED BLOOD CELLS
-axes(handles.axes2);
+axes(handles.rgb2);
 imshow(myImage);
 set(handles.rbcText, 'string', 'Loaded Blood Smears Image');
 pause(1);
@@ -313,6 +313,8 @@ elseif color == "lab"
         myImage = rgb2lab(myImage);
 elseif color == "xyz"
         myImage = rgb2xyz(myImage);
+else
+        myImage = myImage;
 end
 
 function totalcells_Callback(hObject, eventdata, handles)
