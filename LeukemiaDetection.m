@@ -87,7 +87,9 @@ else
     myImage = imread(selectedfile);
    
    % call process function
+   cellsSegmentation(handles, myImage, "rgb");
    cellsSegmentation(handles, myImage, "hsv");
+   cellsSegmentation(handles, myImage, "xyz");
 end
 
 % --- Executes on button press in loadCamera.
@@ -171,7 +173,9 @@ cla;
 set(handles.captureImg,'Visible','off');
 
 % call process function
-cellsSegmentation(handles, inputimage, "hsv");
+cellsSegmentation(handles, myImage, "rgb");
+cellsSegmentation(handles, myImage, "hsv");
+cellsSegmentation(handles, myImage, "xyz");
 
 function cellsSegmentation(handles, myImage, colorspace)
 
@@ -179,7 +183,13 @@ function cellsSegmentation(handles, myImage, colorspace)
 myImage = convertColorSpace(colorspace, myImage);
 
 %% WHITE BLOOD CELLS
-axes(handles.rgb1);
+if colorspace == "hsv"
+        axes(handles.hsv1);
+elseif colorspace == "xyz"
+        axes(handles.xyz1);
+else
+        axes(handles.rgb1);
+end
 imshow(myImage);
 set(handles.wbcText, 'string', 'Loaded Blood Smears Image');
 pause(1);
@@ -234,7 +244,13 @@ pause(2);
 
 
 %% RED BLOOD CELLS
-axes(handles.rgb2);
+if colorspace == "hsv"
+        axes(handles.hsv2);
+elseif colorspace == "xyz"
+        axes(handles.xyz2);
+else
+        axes(handles.rgb2);
+end
 imshow(myImage);
 set(handles.rbcText, 'string', 'Loaded Blood Smears Image');
 pause(1);
