@@ -207,7 +207,11 @@ set(handles.wbcText, 'string', 'Loaded Blood Smears Image');
 pause(1);
 
 %%Extracting the blue plane 
-bPlane = myImage(:,:,3)  - 0.5*(myImage(:,:,1)) - 0.5*(myImage(:,:,2));
+if colorspace == "cmyk"
+    bPlane = myImage(:,:,1)- 0.4*(myImage(:,:,3)) - 0.6*(myImage(:,:,2));
+else
+    bPlane = myImage(:,:,3)  - 0.5*(myImage(:,:,1)) - 0.5*(myImage(:,:,2));
+end
 imshow(bPlane);
 set(handles.wbcText, 'string', 'Extracted White Blood Cells');
 pause(1);
@@ -269,7 +273,11 @@ set(handles.rbcText, 'string', 'Loaded Blood Smears Image');
 pause(1);
 
 %% Extracting the red plane 
-rPlane = myImage(:,:,1)- 0.4*(myImage(:,:,3)) - 0.6*(myImage(:,:,2));
+if colorspace == "cmyk"
+    rPlane = myImage(:,:,3)  - 0.5*(myImage(:,:,1)) - 0.5*(myImage(:,:,2));
+else
+    rPlane = myImage(:,:,1)- 0.4*(myImage(:,:,3)) - 0.6*(myImage(:,:,2));
+end
 imshow(rPlane);
 set(handles.rbcText, 'string', 'Extracted Red Blood Cells');
 pause(1);
