@@ -380,50 +380,6 @@ end
 
 function exportData
 
-% --- Executes on button press in exportData.
-function exportData_Callback(hObject, eventdata, handles)
-% hObject    handle to exportData (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of exportData
-
-%% Get all result data
-cmykWbc = get(handles.wbcCMYK,'String');
-cmykRbc = get(handles.rbcCMYK,'String');
-cmykTotal = get(handles.totalcellsCMYK,'String');
-cmykWbcP = get(handles.wbcpercentCMYK,'String');
-cmykRbcP = get(handles.rbcpercentCMYK,'String');
-
-yvbcrWbc = get(handles.wbcYCbCr,'String');
-ycbcrRbc = get(handles.rbcYCbCr,'String');
-ycbcrTotal = get(handles.totalcellsYCbCr,'String');
-ycbcrWbcP = get(handles.wbcpercentYCbCr,'String');
-ycbcrRbcP = get(handles.rbcpercentYCbCr,'String');
-
-rgbWbc = get(handles.wbcRGB,'String');
-rgbRbc = get(handles.rbcRGB,'String');
-rgbTotal = get(handles.totalcellsRGB,'String');
-rgbWbcP = get(handles.wbcpercentRGB,'String');
-rgbRbcP = get(handles.rbcpercentRGB,'String');
-
-%% Create tables
-cmykTable = table('CMYK',cmykWbc,cmykRbc,cmykTotal,cmykWbcP,cmykRbcP);
-cmykTable.Properties.VariableNames = {'ColorSpace' 'WBCs' 'RBCs' 'Total' 'WBCsPercent' 'RBCsPercent'};
-
-ycbcrTable = table('YcBcR',yvbcrWbc,ycbcrRbc,ycbcrTotal,ycbcrWbcP,ycbcrRbcP);
-ycbcrTable.Properties.VariableNames = {'ColorSpace' 'WBCs' 'RBCs' 'Total' 'WBCsPercent' 'RBCsPercent'};
-
-rgbTable = table('RGB',rgbWbc,rgbRbc,rgbTotal,rgbWbcP,rgbRbcP);
-rgbTable.Properties.VariableNames = {'ColorSpace' 'WBCs' 'RBCs' 'Total' 'WBCsPercent' 'RBCsPercent'};
-
-% write to excel file
-writetable(rgbTable,'LeukemiaResults.xlsx','Sheet',1);
-writetable(cmykTable,'LeukemiaResults.xlsx','Sheet',2);
-writetable(ycbcrTable,'LeukemiaResults.xlsx','Sheet',3);
-
-%% Show alert result
-success = msgbox('Data exported into Excel File.','Success');
 
 function totalcellsRGB_Callback(hObject, eventdata, handles)
 % hObject    handle to totalcellsRGB (see GCBO)
